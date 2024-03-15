@@ -1,0 +1,35 @@
+services:
+  web:
+    build: .
+    container_name: portfolio-api
+    restart: always
+    command: uvicorn app.main:app --host 0.0.0.0 --reload --reload-include *
+    ports:
+      - 8000:8000
+    volumes:
+      - .:/app
+    depends_on:
+      - mongodb
+    env_file:
+      - .env
+    
+  mongodb:
+    image: mongo:7.0.6
+    container_name: mongoAPIdb
+    restart: always
+    ports:
+      - 27017:27017
+    env_file:
+      - .env
+    volumes:
+      - type: volume
+        source: mongodata
+        target: /data/db
+volumes:
+  mongodata:
+
+ 
+#docker compose up --build = Create and start containers forthe first time and docker compose up second time onwards
+ #docker compose down = Stop and remove containers, networks
+ #docker compose up -d = detached mode
+ #docker compose ps = check running container
