@@ -1,18 +1,15 @@
+import string
 from datetime import datetime
+from typing import Optional, Annotated
 from pydantic import (
     BaseModel,
     EmailStr,
     Field,
-    HttpUrl,
+    AnyHttpUrl,
      validator,
      ConfigDict,
 )
-from .rwmodel import RWModel
-from .dbModel import DBModelMixin
 from .custom_types import PydanticObjectId
-
-
-
 
 
 class OauthException(BaseModel):
@@ -28,30 +25,39 @@ class OauthToken(BaseModel):
     token_type: str
 
 class OauthTokenData(BaseModel):
-    username: str | None = None
+    user_id: Optional[PydanticObjectId] = Field(None, alias="_id")
+    username: Optional[str] = None
 
+    model_config = ConfigDict(
+        populate_by_name=True,
+        populate_by_alias=True,
+        arbitrary_types_allowed=True,
+        validate_assignment=True
+    )
+
+class UserBase(BaseModel):
+    username: str
+    email: EmailStr
+    image_url: Optional[str] = ""
+    github_url: Optional[str] = ""
+    blog_url: Optional[str] = ""
+    bio: Optional[str] = ""
+    disabled: bool = False
+    created_at: Optional[datetime] = None
+    updated_at: Optional[datetime] = None
 
 class UserInCreate(BaseModel):
-    username: str
+    username: Annotated[str, Field(..., min_length=5, max_length=25, pattern="^[a-zA-Z0-9_-]+$", to_lower=True)]
     email: EmailStr
+    password: Annotated[str, Field(..., min_length=8, max_length=16)]
+
+
+class UserInDB(UserBase):
     password: str
 
-class UserInResponse(BaseModel):
+class UserCreateResponse(BaseModel):
     message: str
-    id: PydanticObjectId | None = Field(None, alias="_id")
-
-    model_config = ConfigDict(
-        populate_by_name=True,
-        populate_by_alias=True,
-        arbitrary_types_allowed=True,
-        validate_assignment=True
-    )
-
-class User(BaseModel):
     id: PydanticObjectId = Field(..., alias="_id")
-    username: str
-    email: EmailStr
-    created_at: datetime
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -59,3 +65,27 @@ class User(BaseModel):
         arbitrary_types_allowed=True,
         validate_assignment=True
     )
+
+class User(UserBase):
+    id: PydanticObjectId = Field(..., alias="_id")
+    model_config = ConfigDict(
+        populate_by_name=True,
+        populate_by_alias=True,
+        arbitrary_types_allowed=True,
+        validate_assignment=True
+    )
+
+class CountUser(BaseModel):
+    total_users: int
+
+class UserInUpdate(BaseModel):
+    username: Optional[Annotated[str, Field(None, min_length=5, max_length=25, pattern="^[a-zA-Z0-9_-]+$")]] = None
+    email: Optional[EmailStr] = None
+    password: Optional[str] = None
+    image_url: Optional[str] = ""
+    github_url: Optional[str] = ""
+    blog_url: Optional[str] = ""
+    bio: Optional[str] = ""
+    disabled: Optional[bool] = None
+    created_at: Optional[datetime] = None
+    updated_at: Optional[datetime] = None

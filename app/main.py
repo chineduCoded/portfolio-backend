@@ -3,18 +3,18 @@ from typing import Any, Callable, TypeVar
 from fastapi import FastAPI, HTTPException, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
-from .routers import auth, users
+from .routers import auth, users, skills
 from .config import settings
 from .utils.logger import logger
 
 description = f"""
-This is a portfolio app for my projects
+PortfolioApp
 """
 
 app = FastAPI(
     title="My Portfolio App",
     description=description,
-    version="0.1.0",
+    version="0.0.1",
     root_path=settings.root_path
 )
 
@@ -31,15 +31,21 @@ app.add_middleware(
 )
 
 # Include the routers
-# app.include_router(
-#     auth.router, 
-#     prefix="/v1/auth",
-#     tags=["Authentication"]
-# )
+app.include_router(
+    auth.router, 
+    prefix="/v1/auth",
+    tags=["Auth"]
+)
 app.include_router(
     users.router, 
     prefix="/v1/users",
     tags=["Users"]
+)
+
+app.include_router(
+    skills.router,
+    prefix="/v1/skills",
+    tags=["Skills"]
 )
 
 F = TypeVar("F", bound=Callable[..., Any])

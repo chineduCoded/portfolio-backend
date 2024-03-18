@@ -10,4 +10,5 @@ client = AsyncIOMotorClient("mongodb+srv://admin:7j9nXmuOvVY4viL9@portfolio-clus
 db = client[settings.database_name]
 tokens = db.get_collection("tokens")
 user_collection = db.get_collection("users")
+skill_collection = db.get_collection("skills")
 
